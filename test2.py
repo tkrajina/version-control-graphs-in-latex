@@ -1,6 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+ROW_COLUMN_SIZE = 500
+
+def row_column_to_coordinates( row, column ):
+	return ( row * ROW_COLUMN_SIZE, column * ROW_COLUMN_SIZE )
+
 def get_latex_point( node, height ):
 	pass
 
@@ -21,6 +26,13 @@ class Node:
 		self.label = label if label else ''
 		self.row = 0
 		self.column = 0
+
+	def get_latex_string( self ):
+		result = ''
+
+		result += 'latex({0},{1})'.format( self.row, self.column )
+
+		return result
 
 	def __str__( self ):
 		return '[node:{0}:{1},{2}]'.format( self.label, self.row, self.column )
@@ -68,6 +80,19 @@ class Branch:
 			node.row = self.row
 			node.column = start_column + index
 
+	def get_latex_string( self ):
+		result = ''
+
+		if self.branch_from:
+			nodes = [ self.branch_from ] + self.__nodes
+		else:
+			nodes = self.__nodes
+
+		for node in nodes:
+			result += node.get_latex_string()
+
+		return result
+
 	def __str__( self ):
 		return '[branch:{0}:{1}]'.format( self.label, self.__nodes )
 
@@ -89,6 +114,26 @@ class Graph:
 				return node
 
 		return None
+
+	def get_max_row( self ):
+		result = 0
+
+		for branch in self.__branches:
+			if branch.row > result:
+				result = branch.row
+
+		return result
+
+	def get_latex_string( self ):
+		width = 2000
+		height = self.get_max_row() * ROW_COLUMN_SIZE
+
+		result = ''
+
+		for branch in self.__branches:
+			result += branch.get_latex_string()
+
+		return result
 
 	def __str__( self ):
 		return '[graph:{0}]'.format( self.__branches )
@@ -115,4 +160,4 @@ if __name__ == '__main__':
 			branch_from = graph.find_node( 'g' ) )
 	graph.add_branch( branch2 )
 
-	#print graph.to_latex_string()
+	print graph.get_latex_string()
