@@ -31,25 +31,29 @@ def get_latex_arrow( node1, node2, left_padding ):
 
 class Node:
 	
-	text = None
+	label = None
 
 	# x and y will be set only at the moment the LaTeX string is built:
 	x = None
 	y = None
 
-	def __init__( self, text ):
-		self.text = text
+	color = None
+
+	def __init__( self, label, color = None ):
+		self.label = label
 		self.x = None
 		self.y = None
+
+		self.color = color if color else ( 0, 0, 0, )
 
 	def to_latex_string( self, x, y, left_padding ):
 		self.x = x
 		self.y = y
 
-		mod_logging.debug( 'Node {0} to ({1},{2})'.format( self.text, self.x, self.y ) )
+		mod_logging.debug( 'Node {0} to ({1},{2})'.format( self.label, self.x, self.y ) )
 
-		result = '\\put(' + str( left_padding + x - 50 ) + ',' + str( y + 140 ) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{\\textit{' + self.text + '}}}}}}%\n'
-		result += '{\\color[rgb]{0,0,0}\\put(' + str( left_padding + x ) + ',' + str( y ) + '){\\circle*{' + str( NODE_RADIUS ) + '}}}%\n'
+		result = '\\put(' + str( left_padding + x - 50 ) + ',' + str( y + 140 ) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{\\textit{' + self.label + '}}}}}}%\n'
+		result += '{\\color[rgb]{' + str( self.color[ 0 ] ) + ',' + str( self.color[ 1 ] ) + ',' + str( self.color[ 2 ] ) + '}\\put(' + str( left_padding + x ) + ',' + str( y ) + '){\\circle*{' + str( NODE_RADIUS ) + '}}}%\n'
 
 		return result
 
@@ -70,7 +74,15 @@ class Branch:
 		self.start_node = start_node
 
 	def add_node( self, node ):
-		self.__nodes.append( node )
+		""" Node may be instance of Node or string (note label) """
+		if isinstance( node, Node ):
+			self.__nodes.append( node )
+		else:
+			self.__nodes.append( Node( node ) )
+
+	def add_nodes( self, nodes ):
+		for node in nodes:
+			self.add_node( node )
 
 	def get_node( self, index ):
 		return self.__nodes[ index ]
@@ -164,22 +176,11 @@ if __name__ == '__main__':
 	graph = Graph( left_padding = padding )
 
 	master_branch = Branch( title = 'master:' )
-	master_branch.add_node( Node( 'a' ) )
-	master_branch.add_node( Node( 'b' ) )
-	master_branch.add_node( Node( 'c' ) )
-	master_branch.add_node( Node( 'd' ) )
-	master_branch.add_node( Node( 'e' ) )
-	master_branch.add_node( Node( 'f' ) )
-	master_branch.add_node( Node( 'g' ) )
-	master_branch.add_node( Node( 'h' ) )
-	master_branch.add_node( Node( 'i' ) )
+	master_branch.add_nodes( 'abcdefghij' )
 	graph.add_branch( master_branch )
 
 	branch1 = Branch( title = 'development:', start_node = master_branch.get_node( 1 ) )
-	branch1.add_node( Node( 'x' ) )
-	branch1.add_node( Node( 'y' ) )
-	branch1.add_node( Node( 'z' ) )
-	branch1.add_node( Node( 'q' ) )
+	branch1.add_nodes( [ 'x', Node( 'y', color = ( 0, 1, 0 ) ), 'z', 'q' ] )
 	graph.add_branch( branch1 )
 
 	branch2 = Branch( title = 'experiment:', start_node = branch1.get_node( 2 ) )
