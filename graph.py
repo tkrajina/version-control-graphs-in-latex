@@ -11,7 +11,9 @@ ROW_COLUMN_SIZE = 500
 def distance( x1, y1, x2, y2 ):
 	return mod_math.sqrt( ( x2 - x1 ) ** 2 + ( y2 - y1 ) ** 2 )
 
-def get_latex_arrow( node1, node2, left_padding ):
+def get_latex_arrow( node1, node2, left_padding, color = None ):
+	color = color if color else ( 0, 0, 0 )
+
 	x1 = node1.x
 	y1 = node1.y
 	x2 = node2.x
@@ -27,7 +29,7 @@ def get_latex_arrow( node1, node2, left_padding ):
 
 	length = length * .9
 
-	return '\\thicklines{\\color[rgb]{0,0,0}\\put(' + str( left_padding + x1 ) + ',' + str( y1 ) + '){\\vector(' + str( vector_x ) + ',' + str( vector_y ) + '){' + str( length ) + '}}}%\n'
+	return '\\thicklines{\\color[rgb]{' + str( color[ 0 ] ) + ',' + str( color[ 1 ] ) + ',' + str( color[ 2 ] ) + '}\\put(' + str( left_padding + x1 ) + ',' + str( y1 ) + '){\\vector(' + str( vector_x ) + ',' + str( vector_y ) + '){' + str( length ) + '}}}%\n'
 
 class Node:
 	
@@ -87,6 +89,13 @@ class Branch:
 	def get_node( self, index ):
 		return self.__nodes[ index ]
 
+	def find_node( self, node_label ):
+		for node in self.__nodes:
+			if node.label == node_label:
+				return node
+
+		return None
+
 	def to_latex_string( self, y, left_padding ):
 		result = ''
 
@@ -131,14 +140,26 @@ class Graph:
 		self.left_padding = left_padding if left_padding else 0
 		self.__arrows = []
 
+	def find_node( self, node_label ):
+		for branch in self.__branches:
+			node = branch.find_node( node_label )
+			if node:
+				return node
+		return None
+
 	def add_branch( self, branch ):
 		self.__branches.append( branch )
 
 	def get_branch( self, index ):
 		return self.__branches[ index ]
 
-	def add_arrow( self, node1, node2 ):
-		self.__arrows.append( [ node1, node2 ] )
+	def add_arrow( self, node1, node2, color = None ):
+		if not isinstance( node1, Node ):
+			node1 = self.find_node( node1 )
+		if not isinstance( node2, Node ):
+			node2 = self.find_node( node2 )
+
+		self.__arrows.append( [ node1, node2, color ] )
 
 	def to_latex_string( self ):
 		width = 2000
@@ -159,7 +180,9 @@ class Graph:
 			result += branch.to_latex_string( y = start_y - index * ROW_COLUMN_SIZE, left_padding = self.left_padding )
 
 		for arrow in self.__arrows:
-			result += get_latex_arrow( arrow[ 0 ], arrow[ 1 ], left_padding = self.left_padding )
+			arrow_x, arrow_y, color = arrow
+			mod_logging.debug( 'arrow color: {0}'.format( color ) )
+			result += get_latex_arrow( arrow_x, arrow_y, color = color, left_padding = self.left_padding )
 
 		result += '\\end{picture}\n'
 
@@ -180,17 +203,22 @@ if __name__ == '__main__':
 	graph.add_branch( master_branch )
 
 	branch1 = Branch( title = 'development:', start_node = master_branch.get_node( 1 ) )
-	branch1.add_nodes( [ 'x', Node( 'y', color = ( 0, 1, 0 ) ), 'z', 'q' ] )
+	branch1.add_nodes( [ 'x', Node( 'y', color = ( .2, .4, .6 ) ), 'z', 'q' ] )
 	graph.add_branch( branch1 )
 
-	branch2 = Branch( title = 'experiment:', start_node = branch1.get_node( 2 ) )
+	short_branch = Branch( title = 'short branch', start_node = master_branch.find_node( 'e' ) )
+	short_branch.add_nodes( '12' )
+	graph.add_branch( short_branch )
+
+	branch2 = Branch( title = 'experiment:', start_node = master_branch.get_node( 5 ) )
 	branch2.add_node( Node( 'š' ) )
 	branch2.add_node( Node( 'č' ) )
 	branch2.add_node( Node( 'ć' ) )
 	graph.add_branch( branch2 )
 
-	graph.add_arrow( master_branch.get_node( 2 ), branch1.get_node( 2 ) )
-	graph.add_arrow( branch1.get_node( 3 ), master_branch.get_node( 6 ) )
+	graph.add_arrow( 'c', 'z', color = ( .7, .7, .7 ) )
+	graph.add_arrow( 'q', 'g' )
+	graph.add_arrow( 'h', 'ć' )
 
 	print """\\documentclass[11pt,oneside,a4paper]{report}
 
