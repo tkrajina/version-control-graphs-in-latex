@@ -70,17 +70,20 @@ class Branch:
 
 	start_node = None
 
-	def __init__( self, title = None, start_node = None ):
+	color = None
+
+	def __init__( self, title = None, start_node = None, color = None ):
 		self.title = title
 		self.__nodes = []
 		self.start_node = start_node
+		self.color = color if color else ( 0, 0, 0 )
 
 	def add_node( self, node ):
 		""" Node may be instance of Node or string (note label) """
 		if isinstance( node, Node ):
 			self.__nodes.append( node )
 		else:
-			self.__nodes.append( Node( node ) )
+			self.__nodes.append( Node( node, color = self.color ) )
 
 	def add_nodes( self, nodes ):
 		for node in nodes:
@@ -123,7 +126,7 @@ class Branch:
 		if self.start_node:
 			mod_logging.debug( "start node:" + str( self.start_node ) )
 			mod_logging.debug( "first node:" + str( self.__nodes[ 0 ] ) )
-			result += get_latex_arrow( self.start_node, self.__nodes[ 0 ], left_padding = left_padding )
+			result += get_latex_arrow( self.start_node, self.__nodes[ 0 ], left_padding = left_padding, color = self.color )
 
 		return result
 
@@ -206,7 +209,7 @@ if __name__ == '__main__':
 	branch1.add_nodes( [ 'x', Node( 'y', color = ( .2, .4, .6 ) ), 'z', 'q' ] )
 	graph.add_branch( branch1 )
 
-	short_branch = Branch( title = 'short branch', start_node = master_branch.find_node( 'e' ) )
+	short_branch = Branch( title = 'short branch', start_node = master_branch.find_node( 'e' ), color = ( 1, 0, 0 ) )
 	short_branch.add_nodes( '12' )
 	graph.add_branch( short_branch )
 
