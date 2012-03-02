@@ -12,7 +12,7 @@ def get_latex_point( node, height ):
 
 	color = ( 0, 0, 0 )
 
-	result = '\\put(' + str( x - 50 ) + ',' + str( y + 140 ) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{\\textit{' + node.label + '}}}}}}%\n'
+	result = '\\put(' + str( x - 50 ) + ',' + str( y + 100 ) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{\\textit{' + node.label + '}}}}}}%\n'
 	result += '{\\color[rgb]{' + str( color[ 0 ] ) + ',' + str( color[ 1 ] ) + ',' + str( color[ 2 ] ) + '}\\put(' + str( x ) + ',' + str( y ) + '){\\circle*{' + str( NODE_RADIUS ) + '}}}%\n'
 
 	return result
@@ -124,12 +124,30 @@ class Graph:
 
 	__branches = None
 
+	__arrows = None
+
 	def __init__( self ):
 		self.__branches = []
+		self.__arrows = []
 
 	def add_branch( self, branch ):
 		self.__branches.append( branch )
 		branch.reload_points_positions()
+
+	def add_arrow( self, node1, node2 ):
+		if not isinstance( node1, Node ):
+			node1 = self.find_node( node1 )
+
+		if not isinstance( node2, Node ):
+			node2 = self.find_node( node2 )
+
+		if not node1:
+			raise Error( 'No node1 for arrow' )
+
+		if not node2:
+			raise Error( 'No node2 for arrow' )
+
+		self.__arrows.append( [ node1, node2 ] )
 
 	def find_node( self, node_label ):
 		for branch in self.__branches:
@@ -165,6 +183,9 @@ class Graph:
 		for branch in self.__branches:
 			result += branch.get_latex_string( height )
 
+		for node1, node2 in self.__arrows:
+			result += get_latex_arrow( node1, node2, height )
+
 		result += '\\end{picture}\n'
 
 		return result
@@ -175,29 +196,28 @@ class Graph:
 if __name__ == '__main__':
 	graph = Graph()
 
-	master_branch = Branch(
+	graph.add_branch( Branch(
 			label = 'eksperiment',
-			nodes = 'abcdefgh' )
-	graph.add_branch( master_branch )
+			nodes = 'abcdefgh' ) )
 
-	branch1 = Branch(
+	graph.add_branch( Branch(
 			label = 'eksperiment',
 			row = 2,
 			nodes = 'xyzqw',
-			branch_from = graph.find_node( 'b' ) )
-	graph.add_branch( branch1 )
+			branch_from = graph.find_node( 'b' ) ) )
 
-	branch2 = Branch(
+	graph.add_branch( Branch(
 			label = 'eksperiment 2',
 			row = 1,
 			nodes = '1234',
-			branch_from = graph.find_node( 'g' ) )
-	graph.add_branch( branch2 )
+			branch_from = graph.find_node( 'g' ) ) )
+
+	graph.add_arrow( 'd', 'z' )
+	graph.add_arrow( 'q', 'g' )
 
 	# TODO: node color
 	# TODO: branch color
 	# TODO: branch label
-	# TODO: custom arrows
 	# TODO: arrow color
 
 	print """\\documentclass[11pt,oneside,a4paper]{report}
