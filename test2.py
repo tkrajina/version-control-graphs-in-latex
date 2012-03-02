@@ -37,8 +37,9 @@ def get_latex_arrow( node1, node2, height, color = None ):
 	length = length * .9
 	return '\\thicklines{\\color[rgb]{' + str( color[ 0 ] ) + ',' + str( color[ 1 ] ) + ',' + str( color[ 2 ] ) + '}\\put(' + str( x1 ) + ',' + str( y1 ) + '){\\vector(' + str( vector_x ) + ',' + str( vector_y ) + '){' + str( length ) + '}}}%\n'
 
-def get_latex_text( row, column, label, height ):
-	pass
+def get_latex_text( row, label ):
+	y = row * ROW_COLUMN_SIZE
+	return '\\put(' + str( 0 ) + ',' + str( y ) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{\\textit{' + label + '}}}}}}%\n'
 
 class Node:
 
@@ -93,8 +94,8 @@ class Branch:
 				return node
 		return None
 
-	def reload_points_positions( self ):
-		start_column = 0
+	def reload_points_positions( self, column ):
+		start_column = column
 
 		if self.branch_from:
 			start_column = self.branch_from.column + 1
@@ -133,13 +134,16 @@ class Graph:
 
 	__arrows = None
 
-	def __init__( self ):
+	column = None
+
+	def __init__( self, column ):
 		self.__branches = []
 		self.__arrows = []
+		self.column = column if column else 0
 
 	def add_branch( self, branch ):
 		self.__branches.append( branch )
-		branch.reload_points_positions()
+		branch.reload_points_positions( self.column )
 
 	def add_arrow( self, node1, node2, color = None ):
 
@@ -194,6 +198,9 @@ class Graph:
 		for branch in self.__branches:
 			result += branch.get_latex_string( height )
 
+		for branch in self.__branches:
+			result += get_latex_text( branch.row, branch.label )
+
 		for node1, node2, color in self.__arrows:
 			result += get_latex_arrow( node1, node2, height, color = color )
 
@@ -205,7 +212,7 @@ class Graph:
 		return '[graph:{0}]'.format( self.__branches )
 
 if __name__ == '__main__':
-	graph = Graph()
+	graph = Graph( column = 5 )
 
 	graph.add_branch( Branch(
 			label = 'eksperiment',
