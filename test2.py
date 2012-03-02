@@ -1,16 +1,39 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-ROW_COLUMN_SIZE = 500
+ROW_COLUMN_SIZE = 400
+NODE_RADIUS = 100
 
 def row_column_to_coordinates( row, column ):
-	return ( row * ROW_COLUMN_SIZE, column * ROW_COLUMN_SIZE )
+	return ( column * ROW_COLUMN_SIZE, row * ROW_COLUMN_SIZE )
 
 def get_latex_point( node, height ):
-	pass
+	x, y = row_column_to_coordinates( node.row, node.column )
+
+	color = ( 0, 0, 0 )
+
+	result = '\\put(' + str( x - 50 ) + ',' + str( y + 140 ) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{\\textit{' + node.label + '}}}}}}%\n'
+	result += '{\\color[rgb]{' + str( color[ 0 ] ) + ',' + str( color[ 1 ] ) + ',' + str( color[ 2 ] ) + '}\\put(' + str( x ) + ',' + str( y ) + '){\\circle*{' + str( NODE_RADIUS ) + '}}}%\n'
+
+	return result
 
 def get_latex_arrow( node1, node2, height ):
-	pass
+
+	color = ( 0, 0, 0 )
+
+	x1, y1 = row_column_to_coordinates( node1.row, node1.column )
+	#x2, y2 = row_column_to_coordinates( node2.row, node2.column )
+
+	vector_x = node2.column - node1.column
+	vector_y = node2.row - node1.row
+
+	if vector_x == 0:
+		length = ROW_COLUMN_SIZE * abs( vector_y )
+	else:
+		length = ROW_COLUMN_SIZE * abs( vector_x )
+
+	length = length * .9
+	return '\\thicklines{\\color[rgb]{' + str( color[ 0 ] ) + ',' + str( color[ 1 ] ) + ',' + str( color[ 2 ] ) + '}\\put(' + str( x1 ) + ',' + str( y1 ) + '){\\vector(' + str( vector_x ) + ',' + str( vector_y ) + '){' + str( length ) + '}}}%\n'
 
 def get_latex_text( row, column, label, height ):
 	pass
@@ -27,12 +50,8 @@ class Node:
 		self.row = 0
 		self.column = 0
 
-	def get_latex_string( self ):
-		result = ''
-
-		result += 'latex({0},{1})'.format( self.row, self.column )
-
-		return result
+	def get_latex_string( self, height ):
+		return get_latex_point( self, height )
 
 	def __str__( self ):
 		return '[node:{0}:{1},{2}]'.format( self.label, self.row, self.column )
@@ -80,7 +99,7 @@ class Branch:
 			node.row = self.row
 			node.column = start_column + index
 
-	def get_latex_string( self ):
+	def get_latex_string( self, height ):
 		result = ''
 
 		if self.branch_from:
@@ -88,8 +107,13 @@ class Branch:
 		else:
 			nodes = self.__nodes
 
-		for node in nodes:
-			result += node.get_latex_string()
+		for index, node in enumerate( nodes ):
+			result += node.get_latex_string( height )
+
+			if index > 0:
+				previous_node = nodes[ index - 1 ]
+
+				result += get_latex_arrow( previous_node, node, height )
 
 		return result
 
@@ -128,10 +152,20 @@ class Graph:
 		width = 2000
 		height = self.get_max_row() * ROW_COLUMN_SIZE
 
-		result = ''
+		result = '\\setlength{\\unitlength}{4144sp}%\n'
+		result += '\\begingroup\\makeatletter\\ifx\\SetFigFont\\undefined%\n'
+		result += '\\gdef\\SetFigFont#1#2#3#4#5{%\n'
+		result += '  \\reset@font\\fontsize{#1}{#2pt}%\n'
+		result += '  \\fontfamily{#3}\\fontseries{#4}\\fontshape{#5}%\n'
+		result += '  \\selectfont}%\n'
+		result += '\\fi\\endgroup%\n'
+		result += '\\begin{picture}(' + str( width ) + ',' + str( height ) + ')(0,0)%\n'
+
 
 		for branch in self.__branches:
-			result += branch.get_latex_string()
+			result += branch.get_latex_string( height )
+
+		result += '\\end{picture}\n'
 
 		return result
 
@@ -156,8 +190,38 @@ if __name__ == '__main__':
 	branch2 = Branch(
 			label = 'eksperiment 2',
 			row = 1,
-			nodes = 'šđčćž',
+			nodes = '1234',
 			branch_from = graph.find_node( 'g' ) )
 	graph.add_branch( branch2 )
 
+	# TODO: node color
+	# TODO: branch color
+	# TODO: branch label
+	# TODO: custom arrows
+	# TODO: arrow color
+
+	print """\\documentclass[11pt,oneside,a4paper]{report}
+
+\\linespread{1.2}
+
+\\title{test fig}
+
+\\usepackage[dvips]{color}
+\\usepackage[croatian]{babel}
+\\usepackage[utf8]{inputenc}
+\\usepackage{epsfig}
+\\usepackage{makeidx}
+
+\\addtolength{\\hoffset}{-1cm}
+\\addtolength{\\voffset}{-3cm}
+\\addtolength{\\textwidth}{3cm}
+\\addtolength{\\textheight}{4cm}
+\\pagestyle{empty}
+
+\\begin{document}"""
+
 	print graph.get_latex_string()
+
+	print 'OK'
+
+	print "\\end{document}"
