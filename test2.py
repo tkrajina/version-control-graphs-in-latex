@@ -40,8 +40,8 @@ def get_latex_arrow( node1, node2, height, color = None ):
 	return '\\thicklines{\\color[rgb]{' + str( color[ 0 ] ) + ',' + str( color[ 1 ] ) + ',' + str( color[ 2 ] ) + '}\\put(' + str( x1 ) + ',' + str( y1 ) + '){\\vector(' + str( vector_x ) + ',' + str( vector_y ) + '){' + str( length ) + '}}}%\n'
 
 def get_latex_text( row, label ):
-	y = row * ROW_COLUMN_SIZE
-	return '\\put(' + str( 0 ) + ',' + str( y ) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{\\textit{' + label + '}}}}}}%\n'
+	y = ROW_COLUMN_SIZE + row * ROW_COLUMN_SIZE
+	return '\\put(' + str( 0 ) + ',' + str( y ) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{' + label + '}}}}}%\n'
 
 class Node:
 
