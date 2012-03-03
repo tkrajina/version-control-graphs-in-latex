@@ -138,14 +138,16 @@ class Graph:
 
 	column = None
 
-	def __init__( self, column ):
+	def __init__( self, column = None ):
 		self.__branches = []
 		self.__arrows = []
 		self.column = column if column else 0
 
 	def add_branch( self, branch ):
+		"""
 		if len( self.__branches ) == 0 and not branch.label:
 			branch.label = 'master'
+			"""
 
 		self.__branches.append( branch )
 		branch.reload_points_positions( self.column )
