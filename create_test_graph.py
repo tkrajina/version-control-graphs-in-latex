@@ -2,38 +2,36 @@
 # -*- coding: utf-8 -*-
 
 import logging as mod_logging
-import math as mod_math
 
 import cvgraphtex as mod_graph
 
 if __name__ == '__main__':
 	mod_logging.basicConfig( level = mod_logging.DEBUG, format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s' )
 
-	padding = 1200
+	graph = mod_graph.Graph( column = 4 )
 
-	graph = mod_graph.Graph( left_padding = padding )
+	graph.add_branch( mod_graph.Branch(
+			nodes = 'abcdefgh' ) )
 
-	master_branch = mod_graph.Branch( title = 'master:' )
-	master_branch.add_nodes( 'abcdefghij' )
-	graph.add_branch( master_branch )
+	graph.add_branch( mod_graph.Branch(
+			label = 'eksperiment',
+			row = 2,
+			nodes = 'xyzqw',
+			color = ( 0, 0, 1 ),
+			branch_from = graph.find_node( 'b' ) ) )
 
-	branch1 = mod_graph.Branch( title = 'development:', start_node = master_branch.get_node( 1 ) )
-	branch1.add_nodes( [ 'x', mod_graph.Node( 'y', color = ( .2, .4, .6 ) ), 'z', 'q' ] )
-	graph.add_branch( branch1 )
+	graph.add_branch( mod_graph.Branch(
+			label = 'eksperiment 2',
+			row = 1,
+			nodes = '1234',
+			color = ( 1, 0, 0 ),
+			branch_from = graph.find_node( 'g' ) ) )
 
-	short_branch = mod_graph.Branch( title = 'short branch', start_node = master_branch.find_node( 'e' ), color = ( 1, 0, 0 ) )
-	short_branch.add_nodes( '12' )
-	graph.add_branch( short_branch )
-
-	branch2 = mod_graph.Branch( title = 'experiment:', start_node = master_branch.get_node( 5 ) )
-	branch2.add_node( mod_graph.Node( 'š' ) )
-	branch2.add_node( mod_graph.Node( 'č' ) )
-	branch2.add_node( mod_graph.Node( 'ć' ) )
-	graph.add_branch( branch2 )
-
-	graph.add_arrow( 'c', 'z', color = ( .7, .7, .7 ) )
+	graph.add_arrow( 'd', 'z', color = ( 0, 1, 0 ) )
 	graph.add_arrow( 'q', 'g' )
-	graph.add_arrow( 'j', 'ć' )
+
+	# TODO: node color
+	# TODO: branch label
 
 	print """\\documentclass[11pt,oneside,a4paper]{report}
 
@@ -53,11 +51,16 @@ if __name__ == '__main__':
 \\addtolength{\\textheight}{4cm}
 \\pagestyle{empty}
 
-\\begin{document}
-"""
+\\begin{document}"""
 
-	print graph.to_latex_string()
-
+	print
 	print 'OK'
+	print
+
+	print graph.get_latex_string()
+
+	print
+	print 'OK'
+	print
 
 	print "\\end{document}"
