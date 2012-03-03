@@ -3,7 +3,7 @@
 
 import logging as mod_logging
 
-import cvgraphtex as mod_graph
+import vcgraphtex as mod_graph
 
 if __name__ == '__main__':
 	mod_logging.basicConfig( level = mod_logging.DEBUG, format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s' )
