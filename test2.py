@@ -1,11 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import logging as mod_logging
+
 ROW_COLUMN_SIZE = 400
 NODE_RADIUS = 100
 
 def row_column_to_coordinates( row, column ):
-	return ( column * ROW_COLUMN_SIZE, row * ROW_COLUMN_SIZE )
+	return ( column * ROW_COLUMN_SIZE, ROW_COLUMN_SIZE + row * ROW_COLUMN_SIZE )
 
 def get_latex_point( node, height, color = None ):
 	x, y = row_column_to_coordinates( node.row, node.column )
@@ -142,6 +144,9 @@ class Graph:
 		self.column = column if column else 0
 
 	def add_branch( self, branch ):
+		if len( self.__branches ) == 0 and not branch.label:
+			branch.label = 'master'
+
 		self.__branches.append( branch )
 		branch.reload_points_positions( self.column )
 
@@ -183,7 +188,8 @@ class Graph:
 
 	def get_latex_string( self ):
 		width = 2000
-		height = self.get_max_row() * ROW_COLUMN_SIZE
+		height = ( 3 + self.get_max_row() ) * ROW_COLUMN_SIZE 
+		mod_logging.debug( 'height = {0}'.format( height ) )
 
 		result = '\\setlength{\\unitlength}{4144sp}%\n'
 		result += '\\begingroup\\makeatletter\\ifx\\SetFigFont\\undefined%\n'
@@ -199,7 +205,7 @@ class Graph:
 			result += branch.get_latex_string( height )
 
 		for branch in self.__branches:
-			result += get_latex_text( branch.row, branch.label )
+			result += get_latex_text( branch.row, branch.label + ':' )
 
 		for node1, node2, color in self.__arrows:
 			result += get_latex_arrow( node1, node2, height, color = color )
@@ -212,10 +218,11 @@ class Graph:
 		return '[graph:{0}]'.format( self.__branches )
 
 if __name__ == '__main__':
-	graph = Graph( column = 5 )
+	mod_logging.basicConfig( level = mod_logging.DEBUG, format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s' )
+
+	graph = Graph( column = 4 )
 
 	graph.add_branch( Branch(
-			label = 'eksperiment',
 			nodes = 'abcdefgh' ) )
 
 	graph.add_branch( Branch(
@@ -258,8 +265,14 @@ if __name__ == '__main__':
 
 \\begin{document}"""
 
+	print
+	print 'OK'
+	print
+
 	print graph.get_latex_string()
 
+	print
 	print 'OK'
+	print
 
 	print "\\end{document}"
