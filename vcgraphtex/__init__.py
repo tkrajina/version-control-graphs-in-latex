@@ -207,7 +207,8 @@ class Graph:
 			result += branch.get_latex_string( height )
 
 		for branch in self.__branches:
-			result += get_latex_text( branch.row, branch.label + ':' )
+			if branch.label:
+				result += get_latex_text( branch.row, branch.label + ':' )
 
 		for node1, node2, color in self.__arrows:
 			result += get_latex_arrow( node1, node2, height, color = color )
