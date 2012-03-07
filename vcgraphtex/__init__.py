@@ -50,13 +50,16 @@ class Node:
 	row = None
 	column = None
 
-	def __init__( self, label ):
+	color = None
+
+	def __init__( self, label, color = None ):
 		self.label = label if label else ''
 		self.row = 0
 		self.column = 0
+		self.color = color
 
 	def get_latex_string( self, height, color = None ):
-		return get_latex_point( self, height, color = color )
+		return get_latex_point( self, height, color = self.color if self.color else color )
 
 	def __str__( self ):
 		return '[node:{0}:{1},{2}]'.format( self.label, self.row, self.column )

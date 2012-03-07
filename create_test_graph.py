@@ -23,7 +23,7 @@ if __name__ == '__main__':
 	graph.add_branch( mod_graph.Branch(
 			label = 'eksperiment 2',
 			row = 1,
-			nodes = '1234',
+			nodes = [ '1', '2', '3', mod_graph.Node( '4', color = ( 0, 0, 1 ) ), '5' ],
 			color = ( 1, 0, 0 ),
 			branch_from = graph.find_node( 'g' ) ) )
 
