@@ -11,27 +11,25 @@ if __name__ == '__main__':
 	graph = mod_graph.Graph( column = 4 )
 
 	graph.add_branch( mod_graph.Branch(
-			nodes = 'abcdefgh' ) )
+			nodes = 'abcdefgh',
+			label = 'master' ) )
 
 	graph.add_branch( mod_graph.Branch(
-			label = 'eksperiment',
+			label = 'experimental-branch',
 			row = 2,
 			nodes = 'xyzqw',
 			color = ( 0, 0, 1 ),
 			branch_from = graph.find_node( 'b' ) ) )
 
 	graph.add_branch( mod_graph.Branch(
-			label = 'eksperiment 2',
+			label = 'feature-1',
 			row = 1,
 			nodes = [ '1', '2', '3', mod_graph.Node( '4', color = ( 0, 0, 1 ) ), '5' ],
 			color = ( 1, 0, 0 ),
 			branch_from = graph.find_node( 'g' ) ) )
 
-	graph.add_arrow( 'd', 'z', color = ( 0, 1, 0 ) )
-	graph.add_arrow( 'q', 'g' )
-
-	# TODO: node color
-	# TODO: branch label
+	graph.add_arrow( 'd', 'z', color = ( .5, .5, .5 ) )
+	graph.add_arrow( 'q', 'h' )
 
 	print """\\documentclass[11pt,oneside,a4paper]{report}
 
@@ -53,14 +51,6 @@ if __name__ == '__main__':
 
 \\begin{document}"""
 
-	print
-	print 'OK'
-	print
-
 	print graph.get_latex_string()
-
-	print
-	print 'OK'
-	print
 
 	print "\\end{document}"

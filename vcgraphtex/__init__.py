@@ -20,6 +20,18 @@ def get_latex_point( node, height, color = None ):
 
 	return result
 
+def get_arrow_xy( x, y ):
+	result_x = x
+	result_y = y
+	#if x == 2:import pdb;pdb.set_trace()
+	for i in range( 2, 1 + min( abs( x ), abs( y ) ) ):
+		mod_logging.debug( 'result_x:{0}, result_y:{1}, i:{2}'.format( result_x, result_y, i ) )
+		if result_x % i == 0 and result_y % i == 0:
+			mod_logging.debug( 'Skraćujemo s {0}'.format( i ) )
+			result_x = result_x / i
+			result_y = result_y / i
+	return result_x, result_y
+
 def get_latex_arrow( node1, node2, height, color = None ):
 
 	if not color:
@@ -28,13 +40,14 @@ def get_latex_arrow( node1, node2, height, color = None ):
 	x1, y1 = row_column_to_coordinates( node1.row, node1.column )
 	#x2, y2 = row_column_to_coordinates( node2.row, node2.column )
 
-	vector_x = node2.column - node1.column
-	vector_y = node2.row - node1.row
+	vector_x, vector_y = node2.column - node1.column, node2.row - node1.row
 
 	if vector_x == 0:
 		length = ROW_COLUMN_SIZE * abs( vector_y )
 	else:
 		length = ROW_COLUMN_SIZE * abs( vector_x )
+
+	vector_x, vector_y = get_arrow_xy( vector_x, vector_y )
 
 	length = length * .9
 	return '\\thicklines{\\color[rgb]{' + str( color[ 0 ] ) + ',' + str( color[ 1 ] ) + ',' + str( color[ 2 ] ) + '}\\put(' + str( x1 ) + ',' + str( y1 ) + '){\\vector(' + str( vector_x ) + ',' + str( vector_y ) + '){' + str( length ) + '}}}%\n'
