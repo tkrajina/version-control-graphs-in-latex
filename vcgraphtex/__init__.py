@@ -134,7 +134,8 @@ class Branch:
 			nodes = self.__nodes
 
 		for index, node in enumerate( nodes ):
-			result += node.get_latex_string( height, color = color )
+			if node != self.branch_from:
+				result += node.get_latex_string( height, color = color )
 
 			if index > 0:
 				previous_node = nodes[ index - 1 ]
