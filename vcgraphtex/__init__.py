@@ -54,7 +54,7 @@ def get_latex_arrow( node1, node2, height, color = None ):
 
 def get_latex_text( row, label ):
 	y = ROW_COLUMN_SIZE + row * ROW_COLUMN_SIZE
-	return '\\put(' + str( 0 ) + ',' + str( y ) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{' + label + '}}}}}%\n'
+	return '\\put(' + str( 0 ) + ',' + str( y ) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{\\texttt{' + label + '}}}}}}%\n'
 
 class Node:
 
