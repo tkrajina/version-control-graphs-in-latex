@@ -134,13 +134,14 @@ class Branch:
 			nodes = self.__nodes
 
 		for index, node in enumerate( nodes ):
-			if node != self.branch_from:
+			if node != self.branch_from and node.label != '-':
 				result += node.get_latex_string( height, color = color )
 
 			if index > 0:
-				previous_node = nodes[ index - 1 ]
-
-				result += get_latex_arrow( previous_node, node, height, color = self.color )
+				if nodes[ index - 1 ].label != '-':
+					previous_node = nodes[ index - 1 ]
+				if node.label != '-':
+					result += get_latex_arrow( previous_node, node, height, color = self.color )
 
 		return result
 
