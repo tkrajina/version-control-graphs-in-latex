@@ -86,12 +86,14 @@ class Branch:
 	row = None
 	branch_from = None
 	color = None
+	reverse_arrows = False
 
-	def __init__( self, label = None, nodes = None, row = None, branch_from = None, color = None ):
+	def __init__( self, label = None, nodes = None, row = None, branch_from = None, color = None, reverse_arrows = False ):
 		self.label = label if label else ''
 		self.row = row if row else 0
 		self.branch_from = branch_from
 		self.color = color if color else ( 0, 0, 0 )
+		self.reverse_arrows = reverse_arrows
 
 		self.__nodes = []
 
@@ -141,7 +143,10 @@ class Branch:
 				if nodes[ index - 1 ].label != '-':
 					previous_node = nodes[ index - 1 ]
 				if node.label != '-':
-					result += get_latex_arrow( previous_node, node, height, color = self.color )
+					if self.reverse_arrows:
+						result += get_latex_arrow( node, previous_node, height, color = self.color )
+					else:
+						result += get_latex_arrow( previous_node, node, height, color = self.color )
 
 		return result
 
