@@ -29,8 +29,25 @@ if __name__ == '__main__':
 			color = ( 1, 0, 0 ),
 			branch_from = graph.find_node( 'g' ) ) )
 
+	graph.add_branch( mod_graph.Branch(
+			label = 'test',
+			row = 3,
+			nodes = 'asdfg' ) )
+
 	graph.add_arrow( 'd', 'z', color = ( .5, .5, .5 ) )
 	graph.add_arrow( 'q', 'h' )
+
+	graph.add_square_bracket(
+			column = 16,
+			row = 0,
+			rows = 2,
+			label = 'test1' )
+
+	graph.add_square_bracket(
+			column = 16,
+			row = 3,
+			rows = 1,
+			label = 'test2' )
 
 	print """\\documentclass[11pt,oneside,a4paper]{report}
 

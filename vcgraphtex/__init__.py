@@ -159,11 +159,14 @@ class Graph:
 
 	__arrows = None
 
+	__square_brackets = None
+
 	column = None
 
 	def __init__( self, column = None ):
 		self.__branches = []
 		self.__arrows = []
+		self.__square_brackets = []
 		self.column = column if column else 0
 
 	def add_branch( self, branch ):
@@ -193,6 +196,11 @@ class Graph:
 			raise Error( 'No node2 for arrow' )
 
 		self.__arrows.append( [ node1, node2, color ] )
+
+	def add_square_bracket( self, row, rows, column, label = None ):
+		if not label:
+			label = ''
+		self.__square_brackets.append( [ row, row + rows, column, label ] )
 
 	def find_node( self, node_label ):
 		for branch in self.__branches:
@@ -232,6 +240,14 @@ class Graph:
 		for branch in self.__branches:
 			if branch.label:
 				result += get_latex_text( branch.row, branch.label + ':' )
+
+		for row_from, row_to, column, label in self.__square_brackets:
+			x1, y1 = row_column_to_coordinates( row_from, column )
+			x2, y2 = row_column_to_coordinates( row_to, column )
+			result += '\\put(' + str( x1 ) + ',' + str( y1 - 100 ) + '){\\line(0,1){' + str( ROW_COLUMN_SIZE * ( row_to - row_from ) ) + '}}%\n'
+			result += '\\put(' + str( x1 ) + ',' + str( y1 - 100 ) + '){\\line(-1,0){50}}%\n'
+			result += '\\put(' + str( x2 ) + ',' + str( y2 - 100 ) + '){\\line(-1,0){50}}%\n'
+			result += '\\put(' + str( x2 + 50 ) + ',' + str( y2 - 300 ) + '){' + label + '}%\n'
 
 		for node1, node2, color in self.__arrows:
 			result += get_latex_arrow( node1, node2, height, color = color )
