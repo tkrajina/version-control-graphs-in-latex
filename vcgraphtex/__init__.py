@@ -247,7 +247,7 @@ class Graph:
 			result += '\\put(' + str( x1 ) + ',' + str( y1 - 100 ) + '){\\line(0,1){' + str( ROW_COLUMN_SIZE * ( row_to - row_from ) ) + '}}%\n'
 			result += '\\put(' + str( x1 ) + ',' + str( y1 - 100 ) + '){\\line(-1,0){50}}%\n'
 			result += '\\put(' + str( x2 ) + ',' + str( y2 - 100 ) + '){\\line(-1,0){50}}%\n'
-			result += '\\put(' + str( x2 + 50 ) + ',' + str( y2 - 300 ) + '){' + label + '}%\n'
+			result += '\\put(' + str( x2 + 50 ) + ',' + str( ( y1 + y2 ) / 2 - 125 ) + '){' + label + '}%\n'
 
 		for node1, node2, color in self.__arrows:
 			result += get_latex_arrow( node1, node2, height, color = color )
