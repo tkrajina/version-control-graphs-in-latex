@@ -108,6 +108,9 @@ class Branch:
 		else:
 			self.__nodes.append( Node( label = str( node ) ) )
 
+	def get_node( self, number ):
+		return self.__nodes[ number ]
+
 	def find_node( self, node_label ):
 		for node in self.__nodes:
 			if node.label == node_label:
@@ -177,6 +180,9 @@ class Graph:
 
 		self.__branches.append( branch )
 		branch.reload_points_positions( self.column )
+
+	def get_branch( self, number ):
+		return self.__branches[ number ]
 
 	def add_arrow( self, node1, node2, color = None ):
 
