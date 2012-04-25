@@ -3,14 +3,14 @@
 
 import logging as mod_logging
 
-ROW_COLUMN_SIZE = 400
+DEFAULT_NODE_DISTANCE = 400
 NODE_RADIUS = 100
 
-def row_column_to_coordinates(row, column):
-    return (column * ROW_COLUMN_SIZE, ROW_COLUMN_SIZE + row * ROW_COLUMN_SIZE)
+def row_column_to_coordinates(row, column, node_distance):
+    return (column * node_distance, node_distance + row * node_distance)
 
-def get_latex_point(node, height, color = None):
-    x, y = row_column_to_coordinates(node.row, node.column)
+def get_latex_point(node, height, node_distance, color = None):
+    x, y = row_column_to_coordinates(node.row, node.column, node_distance)
 
     if not color:
         color = (0, 0, 0)
@@ -32,28 +32,27 @@ def get_arrow_xy(x, y):
             result_y = result_y / i
     return result_x, result_y
 
-def get_latex_arrow(node1, node2, height, color = None):
+def get_latex_arrow(node1, node2, height, node_distance, color=None):
 
     if not color:
         color = (0, 0, 0)
 
-    x1, y1 = row_column_to_coordinates(node1.row, node1.column)
-    #x2, y2 = row_column_to_coordinates(node2.row, node2.column)
+    x1, y1 = row_column_to_coordinates(node1.row, node1.column, node_distance)
 
     vector_x, vector_y = node2.column - node1.column, node2.row - node1.row
 
     if vector_x == 0:
-        length = ROW_COLUMN_SIZE * abs(vector_y)
+        length = node_distance * abs(vector_y)
     else:
-        length = ROW_COLUMN_SIZE * abs(vector_x)
+        length = node_distance * abs(vector_x)
 
     vector_x, vector_y = get_arrow_xy(vector_x, vector_y)
 
     length = length * .9
     return '\\thicklines{\\color[rgb]{' + str(color[0]) + ',' + str(color[1]) + ',' + str(color[2]) + '}\\put(' + str(x1) + ',' + str(y1) + '){\\vector(' + str(vector_x) + ',' + str(vector_y) + '){' + str(length) + '}}}%\n'
 
-def get_latex_text(row, label):
-    y = ROW_COLUMN_SIZE + row * ROW_COLUMN_SIZE
+def get_latex_text(row, label, node_distance):
+    y = node_distance + row * node_distance
     return '\\put(' + str(0) + ',' + str(y) + '){\\makebox(0,0)[lb]{\\smash{{\\SetFigFont{12}{14.4}{\\rmdefault}{\\mddefault}{\\updefault}{\\texttt{' + label + '}}}}}}%\n'
 
 class Node:
@@ -71,8 +70,8 @@ class Node:
         self.column = 0
         self.color = color
 
-    def get_latex_string(self, height, color = None):
-        return get_latex_point(self, height, color = self.color if self.color else color)
+    def get_latex_string(self, height, node_distance, color=None):
+        return get_latex_point(self, height, node_distance, color = self.color if self.color else color)
 
     def __str__(self):
         return '[node:{0}:{1},{2}]'.format(self.label, self.row, self.column)
@@ -88,7 +87,7 @@ class Branch:
     color = None
     reverse_arrows = False
 
-    def __init__(self, label = None, nodes = None, row = None, branch_from = None, color = None, reverse_arrows = False):
+    def __init__(self, label=None, nodes=None, row=None, branch_from=None, color=None, reverse_arrows=False):
         self.label = label if label else ''
         self.row = row if row else 0
         self.branch_from = branch_from
@@ -127,7 +126,7 @@ class Branch:
             node.row = self.row
             node.column = start_column + index
 
-    def get_latex_string(self, height, color = None):
+    def get_latex_string(self, height, node_distance, color=None):
         result = ''
 
         if not color:
@@ -140,16 +139,18 @@ class Branch:
 
         for index, node in enumerate(nodes):
             if node != self.branch_from and node.label != '-':
-                result += node.get_latex_string(height, color = color)
+                result += node.get_latex_string(height, node_distance, color = color)
 
             if index > 0:
                 if nodes[index - 1].label != '-':
                     previous_node = nodes[index - 1]
                 if node.label != '-':
                     if self.reverse_arrows:
-                        result += get_latex_arrow(node, previous_node, height, color = self.color)
+                        result += get_latex_arrow(node, previous_node, height, node_distance,
+                                                  color=self.color)
                     else:
-                        result += get_latex_arrow(previous_node, node, height, color = self.color)
+                        result += get_latex_arrow(previous_node, node, height, node_distance,
+                                                  color=self.color)
 
         return result
 
@@ -166,11 +167,12 @@ class Graph:
 
     column = None
 
-    def __init__(self, column = None):
+    def __init__(self, column = None, node_distance=None):
         self.__branches = []
         self.__arrows = []
         self.__square_brackets = []
         self.column = column if column else 0
+        self.node_distance = node_distance if node_distance else DEFAULT_NODE_DISTANCE
 
     def add_branch(self, branch):
         """
@@ -227,7 +229,8 @@ class Graph:
 
     def get_latex_string(self):
         width = 2000
-        height = (3 + self.get_max_row()) * ROW_COLUMN_SIZE 
+
+        height = (3 + self.get_max_row()) * self.node_distance 
         mod_logging.debug('height = {0}'.format(height))
 
         result = '\\setlength{\\unitlength}{4144sp}%\n'
@@ -241,22 +244,22 @@ class Graph:
 
 
         for branch in self.__branches:
-            result += branch.get_latex_string(height)
+            result += branch.get_latex_string(height, self.node_distance)
 
         for branch in self.__branches:
             if branch.label:
-                result += get_latex_text(branch.row, branch.label + ':')
+                result += get_latex_text(branch.row, branch.label + ':', self.node_distance)
 
         for row_from, row_to, column, label in self.__square_brackets:
-            x1, y1 = row_column_to_coordinates(row_from, column)
-            x2, y2 = row_column_to_coordinates(row_to, column)
-            result += '\\put(' + str(x1) + ',' + str(y1 - 100) + '){\\line(0,1){' + str(ROW_COLUMN_SIZE * (row_to - row_from)) + '}}%\n'
+            x1, y1 = row_column_to_coordinates(row_from, column, self.node_distance)
+            x2, y2 = row_column_to_coordinates(row_to, column, self.node_distance)
+            result += '\\put(' + str(x1) + ',' + str(y1 - 100) + '){\\line(0,1){' + str(self.node_distance * (row_to - row_from)) + '}}%\n'
             result += '\\put(' + str(x1) + ',' + str(y1 - 100) + '){\\line(-1,0){50}}%\n'
             result += '\\put(' + str(x2) + ',' + str(y2 - 100) + '){\\line(-1,0){50}}%\n'
             result += '\\put(' + str(x2 + 50) + ',' + str((y1 + y2) / 2 - 125) + '){' + label + '}%\n'
 
         for node1, node2, color in self.__arrows:
-            result += get_latex_arrow(node1, node2, height, color = color)
+            result += get_latex_arrow(node1, node2, height, self.node_distance, color = color)
 
         result += '\\end{picture}\n'
 
