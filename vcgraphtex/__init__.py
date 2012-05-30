@@ -230,7 +230,7 @@ class Graph:
     def get_latex_string(self):
         width = 2000
 
-        height = (3 + self.get_max_row()) * self.node_distance 
+        height = (2 + self.get_max_row()) * self.node_distance 
         mod_logging.debug('height = {0}'.format(height))
 
         result = '\\setlength{\\unitlength}{4144sp}%\n'
